@@ -82,11 +82,11 @@ I want to do more feature engineering like adjusting for the seasons or working 
 Also, I would like to try models other than Autogluon and do hyperparameter tuning.
 
 ### Create a table with the models you ran, the hyperparameters modified, and the kaggle score.
-|model|score|
-|--|--|
-|initial|1.80690|
-|add_features|0.6685|
-|hpo|0.4652|
+|model|hpo1|hpo2|hpo3|hpo4|score|
+|--|--|--|--|--|--|
+|initial|default values|default values|default values|default values|1.80690|
+|add_features|default values|default values|default values|default values|0.6685|
+|hpo|NN epochs:[10], num_trials: [5]|NN epochs:[100], num_trials:[5]|NN epochs:[10], num_trials:[10]|auto_stack=True, NN epochs: [10], num_trials: [5]|0.4652|
 
 
 ### Create a line plot showing the top model score for the three (or more) training runs during the project.
@@ -98,7 +98,60 @@ Also, I would like to try models other than Autogluon and do hyperparameter tuni
 ![model_test_score.png](model_test_score.png)
 
 ## Summary
-Autogluon is an easy-to-use, super-powerful package that can implement the entire ML workflow with just a few lines of code, including input data such as tabular, text, and images.
-Nevertheless, feature engineering is still very necessary to improve its performance. For example, in our project, we split the year, month, day, hour from datetime column. Compared with the initial ones without feature extraction, it improves the performance of the model by up to 63%.
 
-There is no complete official documentation for Autogluon's hyperparameter optimization, and we look forward to corresponding updates in the future.
+This project uses the Autogluon package to implement the prediction of a Kaggle competition on "Bike Sharing Demand" in Amazon Sagemaker Studio.
+
+Autogluon is a simple-to-use, incredibly powerful package which can implement the whole machine learning workflow with just a few lines of code spanning image, text, and tabular data. Here we focus on the AutoGluon’s Tabular Prediction.
+
+The following three sections make up our entire work:
+
+1. Create a baseline model directly using Autogluon
+
+   set the parameters as `eval_metric='root_mean_squared_error, time_limit=10*60, presets='best_quality'`. The initial score is 1.80690.
+
+2. Exploratory Data Analysis and Creating an additional feature
+
+   2a). Split the `datetime` into `year, month, week, day, hour`
+
+   2b). Split the `datetime` into `year, month, week, day,dayofweek, hour, saturday, sunday`
+
+   2c). Split the `datetime` into `year, month, week, day, hour` and perform map processing on year - {2011:0, 2012:1}
+
+3. Rerun the model with the same settings as before, just with more features
+
+   | features | rmse score  |
+   | -------- | ----------- |
+   | 2a       | **0.66850** |
+   | 2b       | 0.69380     |
+   | 2c       | 0.67641     |
+
+   Splitting the `datetime` into `year, month, week, day, hour` outperforms the other feature   groups. 
+
+4. Hyper parameter optimization
+
+   | hpo  | hyperparams                                       | rmse score  |
+   | ---- | ------------------------------------------------- | ----------- |
+   | hpo1 | NN epochs:[10], num_trials: [5]                   | 0.46777     |
+   | hpo2 | NN epochs:[100], num_trials:[5]                   | **0.46521** |
+   | hpo3 | NN epochs:[10], num_trials:[10]                   | 0.46876     |
+   | hpo4 | auto_stack=True, NN epochs: [10], num_trials: [5] | 0.47746     |
+
+​	The hpo2 with `NN epochs:[100], num_trials:[5]` outperform than other hpo combinations.
+
+Let's see the final scores below:
+
+| model        | score   |
+| ------------ | ------- |
+| initial      | 1.80690 |
+| add_features | 0.6685  |
+| hpo          | 0.4652  |
+
+We can see that the improvement in model performance is greatly influenced by the feature engineering and hyperparameter optimization parts with an increase of **74.25%**.
+
+Further work:
+
+1. Experiment out several models, such as classical and deep learning models, to determine whether they can improve the performance.
+2. Do more feature engineering like adjusting for the seasons or working hours.
+
+
+
